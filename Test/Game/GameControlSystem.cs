@@ -17,6 +17,7 @@ public class GameControlSystem : SystemBase, IUpdatableSystem
     }
     private EntityQuery _query = null!;
     private KeyboardState _previousKeyboardState;
+    
 	public void Update(GameTime gameTime)
     {
         var keyboardState = Keyboard.GetState();
@@ -37,7 +38,7 @@ public class GameControlSystem : SystemBase, IUpdatableSystem
             else if (keyboardState.IsKeyDown(Keys.Space) && !_previousKeyboardState.IsKeyDown(Keys.Space))
                 TogglePause();
         }
-        if (Keyboard.GetState().IsKeyDown(Keys.R))
+        if (Keyboard.GetState().IsKeyDown(Keys.R) && !_previousKeyboardState.IsKeyDown(Keys.R))
         {
             RestartGame();
         }
@@ -68,9 +69,8 @@ public class GameControlSystem : SystemBase, IUpdatableSystem
     private void InitializeSnake()
     {
         var head = World.CreateEntity("SnakeHead");
-        head.AddComponent(new SnakeComponent { Position = new Vector2(400, 300) });
+        head.AddComponent(new SnakeComponent { Position = new Vector2(400, 300), IsHead = true, Index = 0, });
         head.AddComponent(new ColorComponent { Color = Color.Green });
-        head.AddComponent(new SnakeComponent { IsHead = true, Index = 0 });
         head.AddComponent(
             new DirectionComponent
             {
@@ -81,15 +81,14 @@ public class GameControlSystem : SystemBase, IUpdatableSystem
         for (var i = 1; i < 3; i++)
         {
             var segment = World.CreateEntity($"SnakeSegment_{i}");
-            segment.AddComponent(new SnakeComponent { Position = new Vector2(400 - i * 20, 300) });
+            segment.AddComponent(new SnakeComponent { Position = new Vector2(400 - i * 20, 300), IsHead = false, Index = i });
             segment.AddComponent(new ColorComponent { Color = Color.LightGreen });
-            segment.AddComponent(new SnakeComponent { IsHead = false, Index = i });
         }
     }
 
     private void SpawnInitialFood()
     {
-        var random = new Random();
+        var random = Random.Shared;
         var food = World.CreateEntity("Food");
         food.AddComponent(
             new FoodComponent
@@ -100,6 +99,5 @@ public class GameControlSystem : SystemBase, IUpdatableSystem
                 )
             });
         food.AddComponent(new ColorComponent { Color = Color.Red });
-        food.AddComponent(new FoodComponent());
     }
 }

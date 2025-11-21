@@ -14,8 +14,8 @@ public class GameWorldBuilder
         var world =
             (new WorldBuilder() >>
              new GameControlSystem() >>
-             new CollisionSystem() >>
              new SnakeMovementSystem() >>
+             new CollisionSystem() >>
              new GameRenderSystem(RustedGame.GameInstance.GraphicsDevice) >>
              new UiRenderSystem(RustedGame.GameInstance.GraphicsDevice, Program.Font)
             ).Build();

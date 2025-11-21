@@ -55,7 +55,7 @@ public class CollisionSystem : SystemBase, IUpdatableSystem
             .Where(x => !x.comp1.IsHead);
 
         if (snakeHeads.Any(head =>
-                snakeBodies.Any(body => Vector2.Distance(head.comp1.Position, body.comp1.Position) < _gridSize / 20f)))
+                snakeBodies.Any(body => Vector2.Distance(head.comp1.Position, body.comp1.Position) == 0f)))
             GameOver();
 
     }
@@ -77,13 +77,13 @@ public class CollisionSystem : SystemBase, IUpdatableSystem
     private void CreateSnakeSegment(Vector2 position, int index, bool isHead)
     {
         var segment = World.CreateEntity($"SnakeSegment_{index}");
-        segment.AddComponent(new SnakeComponent { Position = position });
         segment.AddComponent(new ColorComponent { Color = isHead ? Color.Green : Color.LightGreen });
         segment.AddComponent(new SnakeComponent 
         { 
             IsHead = isHead, 
             Index = index,
-            PreviousPosition = position
+            PreviousPosition = position,
+            Position = position
         });
 
         if (isHead)
@@ -105,17 +105,16 @@ public class CollisionSystem : SystemBase, IUpdatableSystem
             World.QueueRemoveEntity(entity);
         }
 
-        var random = new Random();
+        var random = Random.Shared;
         var foodEntity = World.CreateEntity("Food");
         foodEntity.AddComponent(new FoodComponent()
         { 
             Position = new Vector2(
                 random.Next(0, 800 / 20) * 20,
                 random.Next(0, 600 / 20) * 20
-            )
+            ),
         });
         foodEntity.AddComponent(new ColorComponent { Color = Color.Red });
-        foodEntity.AddComponent(new FoodComponent { IsEaten = false });
     }
 
     private void IncreaseScore()
@@ -131,10 +130,8 @@ public class CollisionSystem : SystemBase, IUpdatableSystem
     private void GameOver()
     {
         var gameState = World.GetEntities<GameInfoComponent>().FirstOrDefault();
-        if (gameState != null)
-        {
-            var state = gameState.GetComponent<GameInfoComponent>();
-            state.IsGameOver = true;
-        }
+        if (gameState == null) return;
+        var state = gameState.GetComponent<GameInfoComponent>();
+        state.IsGameOver = true;
     }
 }
