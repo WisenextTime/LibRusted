@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="LibRusted.Core/LibRusted.Core.csproj" />
+  <Project Path="Test/Test.csproj" />
+</Solution>
