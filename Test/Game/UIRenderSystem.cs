@@ -17,7 +17,7 @@ public class UiRenderSystem(GraphicsDevice graphicsDevice, SpriteFont font) : Sy
 
 	public void Draw(GameTime gameTime)
 	{
-		var gameStateEntities = World.GetEntities<GameInfoComponent>();
+		var gameStateEntities = World.GetEntities(typeof(GameInfoComponent));
 		if (gameStateEntities.Count == 0) return;
 
 		var gameState = gameStateEntities[0].GetComponent<GameInfoComponent>();

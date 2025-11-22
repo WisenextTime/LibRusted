@@ -47,7 +47,7 @@ public class GameControlSystem : SystemBase, IUpdatableSystem
 
     private void TogglePause()
     {
-        var gameState = World.GetEntities<GameInfoComponent>().FirstOrDefault();
+        var gameState = World.GetEntities(typeof(GameInfoComponent)).FirstOrDefault();
         if (gameState == null) return;
         var state = gameState.GetComponent<GameInfoComponent>();
         state.IsPaused = !state.IsPaused;

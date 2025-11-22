@@ -1,7 +1,6 @@
-﻿// World.cs
-
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using LibRusted.Core.ECS.Components;
 using Microsoft.Xna.Framework;
 
@@ -12,10 +11,13 @@ public class World : IAvailable
     private readonly List<Entity> _entities = [];
     private readonly SystemManager _systemManager;
     private readonly Dictionary<Type, List<Entity>> _componentIndex = new();
-    private readonly Dictionary<ulong, List<Entity>> _maskCache = new();
+    //private readonly Dictionary<ulong, List<Entity>> _maskCache = new();
     private bool _isDirty = true;
 
-    private List<Entity> QueuedRemoveEntities = [];
+    private readonly List<Entity> _queuedRemoveEntities = [];
+    private readonly List<Entity> _queuedAddedEntities = [];
+
+    private static IEnumerable<Type> AllComponentTypes => field??= GetAllComponentTypes();
 
     public Action<WorldChangeArguments>? OnWorldChange;
     internal World()
@@ -28,31 +30,33 @@ public class World : IAvailable
     public Entity CreateEntity(string name = "Entity")
     {
         var entity = new Entity(name);
-        _entities.Add(entity);
-        _isDirty = true;
+        _queuedAddedEntities.Add(entity);
         return entity;
     }
 
     public void QueueRemoveEntity(Entity entity)
     {
-        QueuedRemoveEntities.Add(entity);
+        _queuedRemoveEntities.Add(entity);
     }
 
-    private void RemoveEntity(Entity entity)
+    private void RemoveEntities()
     {
-        _entities.Remove(entity);
-        _isDirty = true;
-        foreach (var index in _componentIndex.Values)
+        if(_queuedRemoveEntities.Count > 0) _isDirty =  true;
+        foreach (var entity in _queuedRemoveEntities)
         {
-            index.Remove(entity);
+            _entities.Remove(entity);
         }
-        
-        _maskCache.Clear();
+        _queuedRemoveEntities.Clear();
     }
 
-    public void OnEntityChanged(Entity entity)
+    private void AddEntities()
     {
-        _isDirty = true;
+        if(_queuedAddedEntities.Count > 0) _isDirty =  true;
+        foreach (var entity in _queuedAddedEntities)
+        {
+            _entities.Add(entity);
+        }
+        _queuedAddedEntities.Clear();
     }
 
     public List<Entity> GetEntities()
@@ -60,78 +64,65 @@ public class World : IAvailable
         return _entities;
     }
 
-    public List<Entity> GetEntities<T>() where T : IComponent
+    public List<Entity> GetEntities(params Type[] types)
     {
-        var componentType = typeof(T);
-
-        if (_componentIndex.TryGetValue(componentType, out var entityList)) return entityList;
-        entityList = [];
-        _componentIndex[componentType] = entityList;
-            
-        RefreshIndexes();
-
-        return GetEntities<T>();
-    }
-
-    public List<Entity> GetEntities<T1, T2>() where T1 : IComponent where T2 : IComponent
-    {
-        var mask = Entity.GetComponentMask<T1>() | Entity.GetComponentMask<T2>();
-        return GetEntitiesByMask(mask);
-    }
-
-    public List<Entity> GetEntities<T1, T2, T3>() 
-        where T1 : IComponent where T2 : IComponent where T3 : IComponent
-    {
-        var mask = Entity.GetComponentMask<T1>() | Entity.GetComponentMask<T2>() | Entity.GetComponentMask<T3>();
-        return GetEntitiesByMask(mask);
-    }
-
-    private List<Entity> GetEntitiesByMask(ulong mask)
-    {
-        if (_maskCache.TryGetValue(mask, out var entities)) return entities;
-        entities = [];
-        foreach (var entity in _entities)
+        List<Entity> entitiesList = [];
+        foreach (var type in types)
         {
-            if ((entity.ComponentMask & mask) == mask)
-                entities.Add(entity);
+            if (!_componentIndex.TryGetValue(type, out var entities)) entities = [];
+            if(entitiesList.Count == 0)entitiesList = entities;
+            else entitiesList = entitiesList.Intersect(entities).ToList();
         }
-        _maskCache[mask] = entities;
-
-        return entities;
+        return entitiesList;
     }
+
+    //private List<Entity> GetEntitiesByMask(ulong mask)
+    //{
+    //    if (_maskCache.TryGetValue(mask, out var entities)) return entities;
+    //    entities = [];
+    //    foreach (var entity in _entities)
+    //    {
+    //        if ((entity.ComponentMask & mask) == mask)
+    //            entities.Add(entity);
+    //    }
+    //    _maskCache[mask] = entities;
+    //    return entities;
+    //}
     
     public void RefreshIndexes()
     {
         if (!_isDirty) return;
         _componentIndex.Clear();
-        _maskCache.Clear();
-        foreach (var entity in _entities)
+        //_maskCache.Clear();
+        foreach (var componentType in AllComponentTypes)
         {
-            if (!entity.Enabled) continue;
+            List<Entity>entityList = [];
             
-            foreach (var componentType in entity.GetAllComponentTypes())
+            _componentIndex[componentType] = entityList;
+
+            foreach (var entity in _entities.Where(entity => entity.Enabled)
+                         .Where(entity => !entityList.Contains(entity) && entity.HasComponent(componentType)))
             {
-                if (!_componentIndex.TryGetValue(componentType, out var entityList))
-                {
-                    entityList = [];
-                    _componentIndex[componentType] = entityList;
-                }
-                
-                if (!entityList.Contains(entity))
-                    entityList.Add(entity);
+                entityList.Add(entity);
             }
         }
-        
         _isDirty = false;
+    }
+    private static IEnumerable<Type> GetAllComponentTypes()
+    {
+        var interfaceType = typeof(IComponent);
+        var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+        var implementingTypes = assemblies
+            .SelectMany(assembly => assembly.GetTypes())
+            .Where(type => interfaceType.IsAssignableFrom(type) && type is { IsInterface: false, IsAbstract: false });
+        return implementingTypes;
     }
     public void Update(GameTime gameTime)
     {
-        if(_isDirty)RefreshIndexes();
+        RefreshIndexes();
         _systemManager.Update(gameTime);
-        foreach (var removeEntity in QueuedRemoveEntities)
-        {
-            RemoveEntity(removeEntity);
-        }
+        RemoveEntities();
+        AddEntities();
     }
 
     public void Draw(GameTime gameTime)

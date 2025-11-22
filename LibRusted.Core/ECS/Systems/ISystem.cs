@@ -2,7 +2,9 @@
 
 public interface ISystem
 {
-	bool Enabled { get; set; }
+	bool Enabled { get; }
+	
+	int Priority { get; }
 	bool Available { get; }
 
 	void BeAdded(World world);

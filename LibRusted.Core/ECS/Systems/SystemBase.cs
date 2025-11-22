@@ -3,6 +3,7 @@
 public abstract class SystemBase : ISystem
 {
 	public bool Enabled { get; set; } = true;
+	public int Priority { get; set; }
 	public bool Available { get; private set; }
 	
 	protected World World = null!;

@@ -18,7 +18,7 @@ public class CollisionSystem : SystemBase, IUpdatableSystem
 
     public void Update(GameTime gameTime)
     {
-        var gameStateEntities = World.GetEntities<GameInfoComponent>();
+        var gameStateEntities = World.GetEntities(typeof(GameInfoComponent));
         if (gameStateEntities.Count == 0) return;
 
         var gameState = gameStateEntities[0].GetComponent<GameInfoComponent>();
@@ -119,7 +119,7 @@ public class CollisionSystem : SystemBase, IUpdatableSystem
 
     private void IncreaseScore()
     {
-        var gameState = World.GetEntities<GameInfoComponent>().FirstOrDefault();
+        var gameState = World.GetEntities(typeof(GameInfoComponent)).FirstOrDefault();
         if (gameState != null)
         {
             var state = gameState.GetComponent<GameInfoComponent>();
@@ -129,7 +129,7 @@ public class CollisionSystem : SystemBase, IUpdatableSystem
 
     private void GameOver()
     {
-        var gameState = World.GetEntities<GameInfoComponent>().FirstOrDefault();
+        var gameState = World.GetEntities(typeof(GameInfoComponent)).FirstOrDefault();
         if (gameState == null) return;
         var state = gameState.GetComponent<GameInfoComponent>();
         state.IsGameOver = true;
