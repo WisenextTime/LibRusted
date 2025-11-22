@@ -1,19 +1,21 @@
-﻿using LibRusted.Core.ECS;
+﻿using LibRusted.Core;
+using LibRusted.Core.ECS;
 using LibRusted.Core.ECS.Systems;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Test.Game.Components;
 namespace Test.Game;
 
-public class UiRenderSystem(GraphicsDevice graphicsDevice, SpriteFont font) : SystemBase, IDrawableSystem
+public class UiRenderSystem(SpriteFont font) : SystemBase, IDrawableSystem
 {
 
+	private GraphicsDevice _graphicsDevice;
 	private SpriteBatch _spriteBatch = null!;
 	protected override void Initialize()
 	{
-		_spriteBatch = new SpriteBatch(graphicsDevice);
+		_graphicsDevice = RustedGame.GameInstance.GraphicsDevice;
+		_spriteBatch = new SpriteBatch(_graphicsDevice);
 	}
-	public void Update(GameTime gameTime) { }
 
 	public void Draw(GameTime gameTime)
 	{

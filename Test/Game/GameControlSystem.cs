@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using LibRusted.Core.ECS;
 using LibRusted.Core.ECS.Systems;
 using LibRusted.Core.ECS.Utils;
 using Microsoft.Xna.Framework;
@@ -60,7 +59,7 @@ public class GameControlSystem : SystemBase, IUpdatableSystem
     }
     private void InitializeGame()
     {
-        var gameState = World.CreateEntity("GameState");
+        var gameState = World.CreateEntity();
         gameState.AddComponent(new GameInfoComponent());
         InitializeSnake();
         SpawnInitialFood();
@@ -68,7 +67,7 @@ public class GameControlSystem : SystemBase, IUpdatableSystem
 
     private void InitializeSnake()
     {
-        var head = World.CreateEntity("SnakeHead");
+        var head = World.CreateEntity();
         head.AddComponent(new SnakeComponent { Position = new Vector2(400, 300), IsHead = true, Index = 0, });
         head.AddComponent(new ColorComponent { Color = Color.Green });
         head.AddComponent(
@@ -80,7 +79,7 @@ public class GameControlSystem : SystemBase, IUpdatableSystem
 
         for (var i = 1; i < 3; i++)
         {
-            var segment = World.CreateEntity($"SnakeSegment_{i}");
+            var segment = World.CreateEntity();
             segment.AddComponent(new SnakeComponent { Position = new Vector2(400 - i * 20, 300), IsHead = false, Index = i });
             segment.AddComponent(new ColorComponent { Color = Color.LightGreen });
         }
@@ -89,14 +88,14 @@ public class GameControlSystem : SystemBase, IUpdatableSystem
     private void SpawnInitialFood()
     {
         var random = Random.Shared;
-        var food = World.CreateEntity("Food");
+        var food = World.CreateEntity();
         food.AddComponent(
             new FoodComponent
             {
                 Position = new Vector2(
                     random.Next(0, 800 / 20) * 20,
                     random.Next(0, 600 / 20) * 20
-                )
+                ),
             });
         food.AddComponent(new ColorComponent { Color = Color.Red });
     }

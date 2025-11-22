@@ -32,13 +32,12 @@ public class CollisionSystem : SystemBase, IUpdatableSystem
     {
         var snakeHeads = _query.WithComponent<SnakeComponent>()
             .Where(x => x.comp1.IsHead);
-        var foods = _query.WithComponent<FoodComponent>();
+        var foods = _query.WithComponent<FoodComponent>().ToList();
 
         foreach (var head in snakeHeads)
         {
-            foreach (var food in foods)
+            foreach (var food in foods.Where(food => Vector2.Distance(head.comp1.Position, food.comp1.Position) < _gridSize))
             {
-                if (!(Vector2.Distance(head.comp1.Position, food.comp1.Position) < _gridSize)) continue;
                 food.comp1.IsEaten = true;
                 GrowSnake();
                 SpawnFood();
@@ -76,7 +75,7 @@ public class CollisionSystem : SystemBase, IUpdatableSystem
 
     private void CreateSnakeSegment(Vector2 position, int index, bool isHead)
     {
-        var segment = World.CreateEntity($"SnakeSegment_{index}");
+        var segment = World.CreateEntity();
         segment.AddComponent(new ColorComponent { Color = isHead ? Color.Green : Color.LightGreen });
         segment.AddComponent(new SnakeComponent 
         { 
@@ -106,7 +105,7 @@ public class CollisionSystem : SystemBase, IUpdatableSystem
         }
 
         var random = Random.Shared;
-        var foodEntity = World.CreateEntity("Food");
+        var foodEntity = World.CreateEntity();
         foodEntity.AddComponent(new FoodComponent()
         { 
             Position = new Vector2(

@@ -17,6 +17,11 @@ public class SystemManager(World world) : IAvailable
 		_orderedSystems = _systems.OrderBy(s => s.Priority);
 		return this;
 	}
+
+	public T? GetSystem<T>() where T : ISystem
+	{
+		return _systems.OfType<T>().FirstOrDefault();
+	}
 	public void Update(GameTime gameTime)
 	{
 		foreach (var system in _orderedSystems.Where(s => s.Enabled)) (system as IUpdatableSystem)?.Update(gameTime);

@@ -1,5 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using LibRusted.Core.ECS;
+using LibRusted.Core.ECS.Components;
+using LibRusted.Core.Pool;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
@@ -38,13 +42,34 @@ public class RustedGame : IAvailable
 	
 	private readonly MainLoop _mainLoop;
 	private World? _world;
-	
+	private ObjectPool<Entity>  _entityPool = new(() => new Entity());
+	public static IEnumerable<Type> AllComponentTypes => field??= GetAllComponentTypes();
+	private Dictionary<Type,ObjectPool<IComponent>> _componentPools = new();
+	internal Entity CreatEntity()
+	{
+		return _entityPool.Create();
+	}
+
+	internal void ReturnEntity(Entity entity)
+	{
+		_entityPool.Return(entity);
+	}
+	private static IEnumerable<Type> GetAllComponentTypes()
+	{
+		var interfaceType = typeof(IComponent);
+		var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+		var implementingTypes = assemblies
+			.SelectMany(assembly => assembly.GetTypes())
+			.Where(type => interfaceType.IsAssignableFrom(type) && type is { IsInterface: false, IsAbstract: false });
+		return implementingTypes;
+	}
 	internal RustedGame(MainLoop mainLoop)
 	{
 		_mainLoop = mainLoop;
 		_mainLoop.LoadContentEvent += Load;
 		_mainLoop.DrawEvent += Draw;
 		_mainLoop.UpdateEvent += Update;
+		_entityPool.AddBuffer(128);
 	}
 	private void Load()
 	{

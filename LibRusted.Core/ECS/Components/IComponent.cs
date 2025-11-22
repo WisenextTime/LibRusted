@@ -1,6 +1,7 @@
-﻿namespace LibRusted.Core.ECS.Components;
+﻿using LibRusted.Core.Pool;
+namespace LibRusted.Core.ECS.Components;
 
-public interface IComponent
+public interface IComponent : IPoolable
 {
 	
 }

@@ -11,13 +11,10 @@ public class World : IAvailable
     private readonly List<Entity> _entities = [];
     private readonly SystemManager _systemManager;
     private readonly Dictionary<Type, List<Entity>> _componentIndex = new();
-    //private readonly Dictionary<ulong, List<Entity>> _maskCache = new();
     private bool _isDirty = true;
 
     private readonly List<Entity> _queuedRemoveEntities = [];
     private readonly List<Entity> _queuedAddedEntities = [];
-
-    private static IEnumerable<Type> AllComponentTypes => field??= GetAllComponentTypes();
 
     public Action<WorldChangeArguments>? OnWorldChange;
     internal World()
@@ -27,9 +24,9 @@ public class World : IAvailable
 
     public SystemManager SystemManager => _systemManager;
 
-    public Entity CreateEntity(string name = "Entity")
+    public Entity CreateEntity()
     {
-        var entity = new Entity(name);
+        var entity = RustedGame.GameInstance.CreatEntity();
         _queuedAddedEntities.Add(entity);
         return entity;
     }
@@ -41,17 +38,20 @@ public class World : IAvailable
 
     private void RemoveEntities()
     {
-        if(_queuedRemoveEntities.Count > 0) _isDirty =  true;
+        if (_queuedRemoveEntities.Count <= 0) return;
+        _isDirty = true;
         foreach (var entity in _queuedRemoveEntities)
         {
             _entities.Remove(entity);
+            RustedGame.GameInstance.ReturnEntity(entity);
         }
         _queuedRemoveEntities.Clear();
     }
 
     private void AddEntities()
     {
-        if(_queuedAddedEntities.Count > 0) _isDirty =  true;
+        if (_queuedAddedEntities.Count <= 0) return;
+        _isDirty = true;
         foreach (var entity in _queuedAddedEntities)
         {
             _entities.Add(entity);
@@ -70,31 +70,16 @@ public class World : IAvailable
         foreach (var type in types)
         {
             if (!_componentIndex.TryGetValue(type, out var entities)) entities = [];
-            if(entitiesList.Count == 0)entitiesList = entities;
-            else entitiesList = entitiesList.Intersect(entities).ToList();
+            entitiesList = entitiesList.Count == 0 ? entities : entitiesList.Intersect(entities).ToList();
         }
         return entitiesList;
     }
-
-    //private List<Entity> GetEntitiesByMask(ulong mask)
-    //{
-    //    if (_maskCache.TryGetValue(mask, out var entities)) return entities;
-    //    entities = [];
-    //    foreach (var entity in _entities)
-    //    {
-    //        if ((entity.ComponentMask & mask) == mask)
-    //            entities.Add(entity);
-    //    }
-    //    _maskCache[mask] = entities;
-    //    return entities;
-    //}
     
     public void RefreshIndexes()
     {
         if (!_isDirty) return;
         _componentIndex.Clear();
-        //_maskCache.Clear();
-        foreach (var componentType in AllComponentTypes)
+        foreach (var componentType in RustedGame.AllComponentTypes)
         {
             List<Entity>entityList = [];
             
@@ -108,21 +93,13 @@ public class World : IAvailable
         }
         _isDirty = false;
     }
-    private static IEnumerable<Type> GetAllComponentTypes()
-    {
-        var interfaceType = typeof(IComponent);
-        var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-        var implementingTypes = assemblies
-            .SelectMany(assembly => assembly.GetTypes())
-            .Where(type => interfaceType.IsAssignableFrom(type) && type is { IsInterface: false, IsAbstract: false });
-        return implementingTypes;
-    }
+    
     public void Update(GameTime gameTime)
     {
         RefreshIndexes();
         _systemManager.Update(gameTime);
-        RemoveEntities();
         AddEntities();
+        RemoveEntities();
     }
 
     public void Draw(GameTime gameTime)

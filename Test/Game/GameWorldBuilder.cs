@@ -16,8 +16,8 @@ public class GameWorldBuilder
              new GameControlSystem() >>
              new SnakeMovementSystem() >>
              new CollisionSystem() >>
-             new GameRenderSystem(RustedGame.GameInstance.GraphicsDevice) >>
-             new UiRenderSystem(RustedGame.GameInstance.GraphicsDevice, Program.Font)
+             new GameRenderSystem() >>
+             new UiRenderSystem(Program.Font)
             ).Build();
 	    return world;
     }
