@@ -10,19 +10,19 @@ public class Sprite2DRenderSystem : SystemBase, IDrawableSystem
 {
 	private GraphicsDevice _graphicsDevice;
 	private SpriteBatch _spriteBatch = null!;
-	public Camera2D Camera;
 	private EntityQuery _query;
 	protected override void Initialize()
 	{
 		_graphicsDevice = RustedGame.GameInstance.GraphicsDevice;
 		_spriteBatch = new SpriteBatch(_graphicsDevice);
-		Camera = new Camera2D(_graphicsDevice.Viewport);
 		_query = new EntityQuery(World);
 	}
-	public void Draw(GameTime gameTime)
+	public virtual void Draw(GameTime gameTime) { }
+
+	protected void RenderSprites<T1, T2>(Matrix drawMatrix = default) where T1 : Transform2DComponent where T2 : Sprite2DComponent
 	{
-		_spriteBatch.Begin(transformMatrix: Camera.ViewMatrix);
-		_query.Process<Transform2DComponent, Sprite2DComponent>((transform, sprite) =>
+		_spriteBatch.Begin(transformMatrix: drawMatrix);
+		_query.Process<T1, T2>((transform, sprite) =>
 		{
 			if(sprite is null)return;
 			if (!sprite.IsVisible) return;
