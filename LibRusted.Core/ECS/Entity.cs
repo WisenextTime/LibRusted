@@ -10,7 +10,7 @@ namespace LibRusted.Core.ECS;
 public class Entity : IPoolable
 {
 	private static ulong _nextId;
-	public ulong Id { get; } = _nextId++;
+	public ulong Id { get; private set; } = _nextId++;
 	public bool Enabled { get; set; } = true;
     
 	private readonly Dictionary<Type, IComponent> _components = new();
@@ -50,5 +50,6 @@ public class Entity : IPoolable
 	public void Reset()
 	{
 		_components.Clear();
+		Id = _nextId++;
 	}
 }

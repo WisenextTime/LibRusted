@@ -2,8 +2,7 @@
 using LibRusted.Core.ECS.Components;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-
-namespace LibRusted.World2D;
+namespace LibRusted.World2D.Components;
 
 public class Camera2DComponent(Viewport viewport) : IComponent
 {

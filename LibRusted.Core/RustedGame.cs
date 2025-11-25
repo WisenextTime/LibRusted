@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using LibRusted.Core.ECS;
 using LibRusted.Core.ECS.Components;
+using LibRusted.Core.ECS.World;
 using LibRusted.Core.Pool;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
@@ -42,9 +43,8 @@ public class RustedGame : IAvailable
 	
 	private readonly MainLoop _mainLoop;
 	private World? _world;
-	private ObjectPool<Entity>  _entityPool = new(() => new Entity());
+	private readonly ObjectPool<Entity> _entityPool = new(() => new Entity());
 	public static IEnumerable<Type> AllComponentTypes => field??= GetAllComponentTypes();
-	private Dictionary<Type,ObjectPool<IComponent>> _componentPools = new();
 	internal Entity CreatEntity()
 	{
 		return _entityPool.Create();
@@ -81,6 +81,7 @@ public class RustedGame : IAvailable
 		_world?.Update(gameTime);
 		if (QueueChangeWorld.world == null) return;
 		_world = QueueChangeWorld.world;
+		_world.Clear();
 		_world.OnWorldChange?.Invoke(QueueChangeWorld.arguments);
 		if(Available) _world.Ready();
 		QueueChangeWorld.world = null;

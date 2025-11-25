@@ -1,11 +1,10 @@
 ﻿using System;
 using LibRusted.Core.ECS.Systems;
-
-namespace LibRusted.Core.ECS;
+namespace LibRusted.Core.ECS.World;
 
 public class WorldBuilder
 {
-	private World _world = new();
+	private readonly World _world = new();
 	public WorldBuilder WithSystems<T>(T system)where T : ISystem { _world.SystemManager.Add(system); return this; }
 	public WorldBuilder BindChangeAction(Action<WorldChangeArguments> action)
 	{

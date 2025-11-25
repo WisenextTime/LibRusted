@@ -6,7 +6,7 @@ public abstract class SystemBase : ISystem
 	public int Priority { get; set; }
 	public bool Available { get; private set; }
 	
-	protected World World = null!;
+	protected World.World World = null!;
 
 	public void Ready()
 	{
@@ -15,7 +15,7 @@ public abstract class SystemBase : ISystem
 		Initialize();
 	}
 
-	public void BeAdded(World world)
+	public void BeAdded(World.World world)
 	{
 		World = world;
 	}

@@ -3,7 +3,7 @@ using LibRusted.Core.ECS.Components;
 using Microsoft.Xna.Framework;
 namespace LibRusted.World2D.Components;
 
-public class Transform2DComponent(Vector2 position = default, float rotation = 0, Vector2 scale = default, Vector2 orign = default)
+public class Transform2DComponent(Vector2 position = default, float rotation = 0, Vector2 scale = default)
 	: IComponent
 {
 	public Vector2 Position
@@ -11,6 +11,7 @@ public class Transform2DComponent(Vector2 position = default, float rotation = 0
 		get;
 		set
 		{
+			if(Locked) return;
 			if(value != field)
 				_isDirty = true;
 			field = value;
@@ -22,6 +23,7 @@ public class Transform2DComponent(Vector2 position = default, float rotation = 0
 		get;
 		set
 		{
+			if(Locked) return;
 			if(!value.Equals(field))
 				_isDirty = true;
 			field = value;
@@ -33,36 +35,25 @@ public class Transform2DComponent(Vector2 position = default, float rotation = 0
 		get;
 		set
 		{
+			if(Locked) return;
 			if(value != field)
 				_isDirty = true;
 			field = value;
 		}
 	} = scale == default ? Vector2.One : scale;
 
-	public Vector2 Origin
-	{
-		get;
-		set
-		{
-			if(value != field)
-				_isDirty = true;
-			field = value;
-		}
-	} = orign;
+	public bool Locked = false;
 
 	private Matrix? _cache;
 	private bool _isDirty = true;
 
 	private Matrix GetWorldMatrix()
 	{
-		if(_isDirty || _cache is null)
-		{
-			_cache = Matrix.CreateTranslation(-Origin.X, -Origin.Y, 0) *
-			         Matrix.CreateScale(Scale.X, Scale.Y, 0) *
-			         Matrix.CreateRotationZ(Rotation) *
-			         Matrix.CreateTranslation(Position.X, Position.Y, 0);
-			_isDirty = false;
-		}
+		if (!_isDirty && _cache is not null) return _cache.Value;
+		_cache = Matrix.CreateScale(Scale.X, Scale.Y, 0) *
+		         Matrix.CreateRotationZ(Rotation) *
+		         Matrix.CreateTranslation(Position.X, Position.Y, 0);
+		_isDirty = false;
 		return _cache.Value;
 	}
 

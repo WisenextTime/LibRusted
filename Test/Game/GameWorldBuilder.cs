@@ -1,6 +1,7 @@
 ﻿using System;
 using LibRusted.Core;
 using LibRusted.Core.ECS;
+using LibRusted.Core.ECS.World;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Test.Game.Components;

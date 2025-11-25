@@ -1,5 +1,6 @@
 <Solution>
   <Project Path="LibRusted.Core/LibRusted.Core.csproj" />
+  <Project Path="LibRusted.World2D.Physics/LibRusted.World2D.Physics.csproj" />
   <Project Path="LibRusted.World2D/LibRusted.World2D.csproj" />
   <Project Path="Test/Test.csproj" />
 </Solution>

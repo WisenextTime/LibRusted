@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
-
-namespace LibRusted.Core.ECS;
+namespace LibRusted.Core.ECS.World;
 
 public readonly struct WorldChangeArguments()
 {

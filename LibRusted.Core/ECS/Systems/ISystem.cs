@@ -7,7 +7,7 @@ public interface ISystem
 	int Priority { get; }
 	bool Available { get; }
 
-	void BeAdded(World world);
+	void BeAdded(World.World world);
 
 	void Ready();
 }

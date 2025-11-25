@@ -8,9 +8,9 @@ namespace LibRusted.World2D.Systems;
 
 public class Sprite2DRenderSystem : SystemBase, IDrawableSystem
 {
-	private GraphicsDevice _graphicsDevice;
+	private GraphicsDevice _graphicsDevice = null!;
 	private SpriteBatch _spriteBatch = null!;
-	private EntityQuery _query;
+	private EntityQuery _query = null!;
 	protected override void Initialize()
 	{
 		_graphicsDevice = RustedGame.GameInstance.GraphicsDevice;
@@ -24,7 +24,7 @@ public class Sprite2DRenderSystem : SystemBase, IDrawableSystem
 		_spriteBatch.Begin(transformMatrix: drawMatrix);
 		_query.Process<T1, T2>((transform, sprite) =>
 		{
-			if(sprite is null)return;
+			if (sprite is null || transform is null) return;
 			if (!sprite.IsVisible) return;
 			_spriteBatch.Draw(
 				sprite.Texture,
@@ -32,7 +32,7 @@ public class Sprite2DRenderSystem : SystemBase, IDrawableSystem
 				sprite.TextureRect,
 				sprite.Color,
 				transform.Rotation + sprite.Rotation,
-				transform.Origin + sprite.Origin,
+				sprite.Origin,
 				transform.Scale * sprite.Scale,
 				sprite.SpriteEffects,
 				sprite.ZIndex

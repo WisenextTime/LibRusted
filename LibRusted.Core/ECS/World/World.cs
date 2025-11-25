@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using LibRusted.Core.ECS.Components;
 using Microsoft.Xna.Framework;
-
-namespace LibRusted.Core.ECS;
+namespace LibRusted.Core.ECS.World;
 
 public class World : IAvailable
 {
@@ -64,6 +62,11 @@ public class World : IAvailable
         return _entities;
     }
 
+    public Entity? GetEntity(ulong id)
+    {
+        return _entities.FirstOrDefault(e => e.Id == id);
+    }
+
     public List<Entity> GetEntities(params Type[] types)
     {
         List<Entity> entitiesList = [];
@@ -115,7 +118,11 @@ public class World : IAvailable
 
     public void Clear()
     {
-        _entities.Clear();
+        foreach (var entity in _entities)
+        {
+            _queuedAddedEntities.Add(entity);
+        }
+        RemoveEntities();
         _isDirty = true;
     }
 }

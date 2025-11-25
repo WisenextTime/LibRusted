@@ -4,7 +4,7 @@ using System.Linq;
 using LibRusted.Core.ECS.Components;
 namespace LibRusted.Core.ECS.Utils;
 
-public class EntityQuery(World world)
+public class EntityQuery(World.World world)
 {
 
     public IEnumerable<Entity> GetEntities<T1>() where T1 : IComponent

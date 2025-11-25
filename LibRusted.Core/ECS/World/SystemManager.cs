@@ -2,8 +2,7 @@
 using System.Linq;
 using LibRusted.Core.ECS.Systems;
 using Microsoft.Xna.Framework;
-
-namespace LibRusted.Core.ECS;
+namespace LibRusted.Core.ECS.World;
 
 public class SystemManager(World world) : IAvailable
 {
